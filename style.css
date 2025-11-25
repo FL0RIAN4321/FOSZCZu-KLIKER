@@ -29,6 +29,7 @@ footer{
  transition: transform 0.1s ease; 
  border-radius: 50%; 
  box-shadow: 0 8px 0 #1abc9c, 0 15px 0 rgba(0, 0, 0, 0.4); 
+ touch-action: manipulation;
 }
 #click-img:active {
  transform: scale(0.95) translateY(4px); 

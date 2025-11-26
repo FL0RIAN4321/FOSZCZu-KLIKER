@@ -13,15 +13,9 @@ const UPGRADES_DATA = [
 ];
 
 const PETS_DATA = [
-    { id: 'pet_cat', name: 'Cyber Kot', bonus: 5, price: 1000, icon: '🐱', dlc: false },
-    { id: 'pet_dog', name: 'Space Dog', bonus: 15, price: 3000, icon: '🐶', dlc: false },
-    { id: 'pet_dragon', name: 'Neon Dragon', bonus: 50, price: 10000, icon: '🐲', dlc: false },
-    
-    // ZWIERZĄTKA DLC
-    { id: 'pet_robot', name: 'Kwadratowy Robot', bonus: 100, price: 50000, icon: '🤖', dlc: true },
-    { id: 'pet_ghost', name: 'Eteryczny Duch', bonus: 200, price: 150000, icon: '👻', dlc: true },
-    { id: 'pet_wizard', name: 'Klikający Mag', bonus: 400, price: 300000, icon: '🧙‍♂️', dlc: true },
-    { id: 'pet_phoenix', name: 'Feniks Światła', bonus: 800, price: 500000, icon: '🔥', dlc: true }
+    { id: 'pet_cat', name: 'Cyber Kot', bonus: 5, price: 1000, icon: '🐱', animation: 'bounce' },
+    { id: 'pet_dog', name: 'Space Dog', bonus: 15, price: 3000, icon: '🐶', animation: 'spin' },
+    { id: 'pet_dragon', name: 'Neon Dragon', bonus: 50, price: 10000, icon: '🐲', animation: 'pulse' }
 ];
 
 const SKINS_DATA = [
@@ -30,26 +24,17 @@ const SKINS_DATA = [
     { id: 'skin-candy', name: 'Cukierkowy Świat', price: 5000, styleClass: 'skin-candy' }
 ];
 
-// DANE DLC
-const DLC_DATA = {
-    id: 'dlc_foszcz',
-    name: 'FOSZCZ DLC',
-    price: 100000,
-    desc: 'Odblokowuje 4 nowe zwierzątka i specjalne dynamiczne tła!'
-};
-
 // === STAN GRY (GAME STATE) ===
 let gameState = {
     score: 0,
     clickValue: 1,
     autoClickPerSecond: 0,
     multiplier: 1,
-    image: null, 
-    upgrades: {}, 
-    pets: [],     
+    image: null, // Base64 obrazka
+    upgrades: {}, // { id: poziom }
+    pets: [],     // [id, id]
     skins: ['skin-cyberpunk'],
     activeSkin: 'skin-cyberpunk',
-    hasDLC: false, 
     lastSave: Date.now()
 };
 
@@ -61,13 +46,10 @@ const ui = {
     clickerImg: document.getElementById('clicker-image'),
     fileInput: document.getElementById('image-upload'),
     petsContainer: document.getElementById('pets-container'),
-    panel: document.querySelector('.game-panel'), 
-    panelHandle: document.getElementById('panel-handle'),
     shopLists: {
         upgrades: document.getElementById('upgrades-list'),
         pets: document.getElementById('pets-list'),
-        skins: document.getElementById('skins-list'),
-        dlc: document.getElementById('dlc-content')
+        skins: document.getElementById('skins-list')
     },
     particles: document.getElementById('particles-container')
 };
@@ -80,12 +62,10 @@ function init() {
     renderPets();
     applySkin(gameState.activeSkin);
     
-    ui.panel.classList.remove('collapsed'); 
-    
     // Pętla gry (Auto-Click) - co 1 sekunda
     setInterval(() => {
         if (gameState.autoClickPerSecond > 0) {
-            addScore(gameState.autoClickPerSecond, false); 
+            addScore(gameState.autoClickPerSecond, false); // False = bez efektów kliknięcia
         }
         updateTitle();
     }, 1000);
@@ -105,27 +85,36 @@ function gameLoop() {
 
 // === LOGIKA GRY ===
 
+// Dodawanie punktów
 function addScore(amount, visual = true, x = 0, y = 0) {
     const finalAmount = amount * gameState.multiplier;
     gameState.score += finalAmount;
     
     if (visual) {
+        // Animacja tekstu +1
         createFloatingText(finalAmount, x, y);
+        // Animacja powiększenia licznika
         ui.score.style.transform = "scale(1.2)";
         setTimeout(() => ui.score.style.transform = "scale(1)", 100);
     }
 }
 
+// Obsługa kliknięcia (Główna mechanika)
 function handleClick(e) {
+    const rect = ui.clicker.getBoundingClientRect();
+    
+    // Oblicz środek kliknięcia dla efektów (obsługa touch i mouse)
     const clientX = e.clientX || e.touches[0].clientX;
     const clientY = e.clientY || e.touches[0].clientY;
     
     addScore(gameState.clickValue, true, clientX, clientY);
     
+    // Efekt wizualny (Shake)
     ui.clicker.classList.remove('shake');
-    void ui.clicker.offsetWidth; 
+    void ui.clicker.offsetWidth; // Trigger reflow
     ui.clicker.classList.add('shake');
     
+    // Efekt cząsteczkowy
     spawnParticles(clientX, clientY);
 }
 
@@ -154,6 +143,7 @@ function spawnParticles(x, y) {
         p.style.left = `${x}px`;
         p.style.top = `${y}px`;
         
+        // Losowy ruch
         const destX = (Math.random() - 0.5) * 200;
         const destY = (Math.random() - 0.5) * 200;
         
@@ -178,7 +168,7 @@ function getUpgradePrice(item) {
 }
 
 function renderShop() {
-    // 1. Render Ulepszeń
+    // Render Ulepszeń
     ui.shopLists.upgrades.innerHTML = '';
     UPGRADES_DATA.forEach(item => {
         const level = gameState.upgrades[item.id] || 0;
@@ -186,55 +176,35 @@ function renderShop() {
         
         const el = document.createElement('div');
         el.className = 'shop-item';
-        el.setAttribute('onclick', `buyUpgrade('${item.id}')`);
-        
         el.innerHTML = `
             <div class="item-icon">${item.icon}</div>
             <div class="item-info">
                 <h4>${item.name} (Lvl ${level})</h4>
                 <p>${item.desc}</p>
             </div>
-            <button class="buy-btn">${price} pkt</button>
+            <button class="buy-btn" onclick="buyUpgrade('${item.id}')">${price} pkt</button>
         `;
         ui.shopLists.upgrades.appendChild(el);
     });
 
-    // 2. Render Zwierzątek
+    // Render Zwierzątek
     ui.shopLists.pets.innerHTML = '';
     PETS_DATA.forEach(pet => {
         const owned = gameState.pets.includes(pet.id);
-        const price = pet.price;
-        
-        // Blokada DLC
-        if (pet.dlc && !gameState.hasDLC) {
-            const el = document.createElement('div');
-            el.className = 'shop-item disabled';
-            el.innerHTML = `<div class="item-icon">🔒</div>
-                            <div class="item-info"><h4>${pet.name} (Wymaga DLC)</h4><p>Potężny bonus po zakupie FOSZCZ DLC</p></div>
-                            <button class="buy-btn disabled">Zablokowane</button>`;
-            ui.shopLists.pets.appendChild(el);
-            return;
-        }
-
         const el = document.createElement('div');
         el.className = `shop-item ${owned ? 'disabled' : ''}`;
-        
-        if (!owned) {
-            el.setAttribute('onclick', `buyPet('${pet.id}')`);
-        }
-        
         el.innerHTML = `
             <div class="item-icon">${pet.icon}</div>
             <div class="item-info">
                 <h4>${pet.name}</h4>
                 <p>+${pet.bonus} pkt/sek</p>
             </div>
-            <button class="buy-btn">${owned ? 'Kupione' : price + ' pkt'}</button>
+            <button class="buy-btn" onclick="buyPet('${pet.id}')">${owned ? 'Kupione' : pet.price + ' pkt'}</button>
         `;
         ui.shopLists.pets.appendChild(el);
     });
 
-    // 3. Render Skinów
+    // Render Skinów
     ui.shopLists.skins.innerHTML = '';
     SKINS_DATA.forEach(skin => {
         const owned = gameState.skins.includes(skin.id);
@@ -242,20 +212,16 @@ function renderShop() {
         
         const el = document.createElement('div');
         el.className = `skin-card ${active ? 'active-skin' : ''}`;
-        el.onclick = () => handleSkinClick(skin);
-        
         el.innerHTML = `
             <h4>${skin.name}</h4>
             <p>${owned ? (active ? 'AKTYWNY' : 'Kliknij by użyć') : skin.price + ' pkt'}</p>
         `;
+        el.onclick = () => handleSkinClick(skin);
         ui.shopLists.skins.appendChild(el);
     });
-    
-    // 4. Render DLC Tab
-    ui.shopLists.dlc.innerHTML = renderDLCTab();
 }
 
-// Funkcje globalne
+// Funkcje globalne (dostępne dla onclick w HTML)
 window.buyUpgrade = (id) => {
     const item = UPGRADES_DATA.find(u => u.id === id);
     const price = getUpgradePrice(item);
@@ -264,6 +230,7 @@ window.buyUpgrade = (id) => {
         gameState.score -= price;
         gameState.upgrades[id] = (gameState.upgrades[id] || 0) + 1;
         
+        // Aplikuj efekt
         if (item.type === 'click') gameState.clickValue += item.value;
         if (item.type === 'auto') gameState.autoClickPerSecond += item.value;
         if (item.type === 'multiplier') gameState.multiplier *= item.value;
@@ -279,11 +246,6 @@ window.buyPet = (id) => {
     if (gameState.pets.includes(id)) return;
     const pet = PETS_DATA.find(p => p.id === id);
     
-    if (pet.dlc && !gameState.hasDLC) {
-        alert("To zwierzątko wymaga zakupu FOSZCZ DLC!");
-        return;
-    }
-
     if (gameState.score >= pet.price) {
         gameState.score -= pet.price;
         gameState.pets.push(id);
@@ -298,10 +260,12 @@ window.buyPet = (id) => {
 };
 
 window.handleSkinClick = (skin) => {
+    // Jeśli już posiadamy skin - aktywuj
     if (gameState.skins.includes(skin.id)) {
         gameState.activeSkin = skin.id;
         applySkin(skin.styleClass);
     } else {
+        // Kupowanie skina
         if (gameState.score >= skin.price) {
             gameState.score -= skin.price;
             gameState.skins.push(skin.id);
@@ -309,87 +273,11 @@ window.handleSkinClick = (skin) => {
             applySkin(skin.styleClass);
         } else {
             alert("Za mało punktów na ten skin!");
-            return;
         }
     }
     renderShop();
     saveGame();
 };
-
-window.buyDLC = (id) => {
-    const dlc = DLC_DATA;
-    if (gameState.hasDLC) return;
-
-    if (gameState.score >= dlc.price) {
-        gameState.score -= dlc.price;
-        gameState.hasDLC = true;
-        
-        alert(`Gratulacje! Zakupiono ${dlc.name}. Odkryto nową zawartość!`);
-        
-        applySkin(gameState.activeSkin); 
-        renderShop();
-        saveGame();
-    } else {
-        alert("Za mało punktów na to DLC!");
-    }
-};
-
-function renderDLCTab() {
-    const dlc = DLC_DATA;
-    if (gameState.hasDLC) {
-        return `
-            <div class="dlc-purchased">
-                <i class="fa-solid fa-trophy"></i>
-                <h2>${dlc.name} - AKTYWOWANE</h2>
-                <p>Odkryłeś nową zawartość w sekcjach Zwierzątka i Wygląd! Dziękujemy za wsparcie!</p>
-            </div>
-        `;
-    }
-    
-    return `
-        <div class="shop-item dlc-card" onclick="buyDLC('${dlc.id}')">
-            <div class="item-icon"><i class="fa-solid fa-crown"></i></div>
-            <div class="item-info">
-                <h4>${dlc.name}</h4>
-                <p>${dlc.desc}</p>
-            </div>
-            <button class="buy-btn">${dlc.price} pkt</button>
-        </div>
-    `;
-}
-
-// === ZINTEGROWANY SYSTEM SKINÓW (UI + BG + DLC) ===
-function applySkin(className) {
-    document.body.classList.remove('skin-cyberpunk', 'skin-forest', 'skin-candy', 'dlc-active-effect');
-    document.body.classList.add(className);
-    
-    gameState.activeSkin = className;
-    
-    const particlesContainer = ui.particles;
-    if (gameState.hasDLC) {
-        document.body.classList.add('dlc-active-effect'); 
-        
-        // Generowanie cząsteczek tła (tylko raz, jeśli jest DLC)
-        if (particlesContainer.children.length === 0) {
-            for (let i = 0; i < 50; i++) {
-                const p = document.createElement('div');
-                p.className = 'bg-particle-dot';
-                p.style.left = `${Math.random() * 100}%`;
-                p.style.top = `${Math.random() * 100}%`;
-                p.style.animationDelay = `${Math.random() * 10}s`;
-                particlesContainer.appendChild(p);
-            }
-        }
-    } else if (particlesContainer) {
-        // Usuwanie cząsteczek tła, jeśli DLC zostało zresetowane
-        particlesContainer.innerHTML = '';
-    }
-}
-
-// === PANEL COLLAPSE LOGIC ===
-function handlePanelToggle() {
-    ui.panel.classList.toggle('collapsed');
-}
 
 // === PETS SYSTEM (RENDEROWANIE NA SCENIE) ===
 function renderPets() {
@@ -397,7 +285,8 @@ function renderPets() {
     const petsCount = gameState.pets.length;
     if (petsCount === 0) return;
 
-    const radius = 140; 
+    // Rozmieść zwierzątka po okręgu
+    const radius = 140; // Odległość od środka
     const step = (2 * Math.PI) / petsCount;
 
     gameState.pets.forEach((petId, index) => {
@@ -406,12 +295,13 @@ function renderPets() {
         el.className = 'pet';
         el.innerText = petData.icon;
         
+        // Matematyka do pozycji na okręgu
         const angle = step * index;
-        const x = Math.cos(angle) * radius; 
+        const x = Math.cos(angle) * radius; // względem środka
         const y = Math.sin(angle) * radius;
         
-        // Pozycjonowanie względem centrum pets-ring
-        el.style.left = `calc(50% + ${x}px - 25px)`; 
+        // Ustawiamy styl. Środek kontenera to 50%, 50%
+        el.style.left = `calc(50% + ${x}px - 25px)`; // -25px to połowa szerokości peta
         el.style.top = `calc(50% + ${y}px - 25px)`;
         
         ui.petsContainer.appendChild(el);
@@ -428,8 +318,10 @@ function loadGame() {
     const save = localStorage.getItem('clickerEvolutionSave');
     if (save) {
         const parsed = JSON.parse(save);
+        // Łączenie (merge) obiektów w razie aktualizacji gry
         gameState = { ...gameState, ...parsed };
         
+        // Przywróć zdjęcie
         if (gameState.image) {
             ui.clickerImg.src = gameState.image;
         }
@@ -443,6 +335,10 @@ function resetGame() {
     }
 }
 
+function applySkin(className) {
+    document.body.className = className;
+}
+
 function updateTitle() {
     document.title = `(${Math.floor(gameState.score)}) Photo Clicker`;
 }
@@ -452,13 +348,11 @@ function updateTitle() {
 function setupEventListeners() {
     // Klikanie
     ui.clicker.addEventListener('mousedown', handleClick);
+    // Obsługa dotyku (mobile)
     ui.clicker.addEventListener('touchstart', (e) => {
-        e.preventDefault(); 
+        e.preventDefault(); // zapobiega podwójnemu kliknięciu
         handleClick(e);
     });
-
-    // Panel Collapse/Expand
-    ui.panelHandle.addEventListener('click', handlePanelToggle);
 
     // Upload zdjęcia
     ui.fileInput.addEventListener('change', (e) => {
@@ -467,6 +361,7 @@ function setupEventListeners() {
             const reader = new FileReader();
             reader.onload = (readerEvent) => {
                 const base64 = readerEvent.target.result;
+                // Sprawdź rozmiar (localStorage ma limity, ok. 5MB)
                 if (base64.length > 3000000) {
                     alert("Zdjęcie jest za duże! Spróbuj mniejszego pliku.");
                     return;
@@ -482,6 +377,7 @@ function setupEventListeners() {
     // Zakładki (Tabs)
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            // UI Update
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
@@ -493,4 +389,5 @@ function setupEventListeners() {
     document.getElementById('reset-btn').addEventListener('click', resetGame);
 }
 
+// Start gry po załadowaniu DOM
 document.addEventListener('DOMContentLoaded', init);

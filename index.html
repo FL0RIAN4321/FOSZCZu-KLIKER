@@ -20,9 +20,9 @@
                 <span class="score-label">PUNKTY</span>
                 <h1 id="score-display">0</h1>
                 <div class="mps-display"><span id="mps">0</span> / sek</div>
-            </div>
-            <div class="header-controls">
-                <button id="reset-btn" class="icon-btn" title="Reset Gry"><i class="fa-solid fa-trash"></i></button>
+                <div class="header-controls">
+                    <button id="reset-btn" class="icon-btn" title="Reset Gry"><i class="fa-solid fa-trash"></i></button>
+                </div>
             </div>
         </header>
 
@@ -39,30 +39,49 @@
                 <input type="file" id="image-upload" accept="image/*" hidden>
             </div>
         </main>
+    </div>
+    
+    <section class="game-panel">
+        
+        <div id="panel-handle" class="panel-handle">
+            <i class="fa-solid fa-chevron-up"></i>
+        </div>
 
-        <section class="game-panel">
-            <nav class="panel-tabs">
-                <button class="tab-btn active" data-tab="upgrades">Ulepszenia</button>
-                <button class="tab-btn" data-tab="pets">Zwierzątka</button>
-                <button class="tab-btn" data-tab="skins">Skiny</button>
-            </nav>
+        <nav class="panel-tabs">
+            <button class="tab-btn active" data-tab="upgrades">Ulepszenia</button>
+            <button class="tab-btn" data-tab="pets">Zwierzątka</button>
+            <button class="tab-btn" data-tab="skins">Skiny</button>
+            <button class="tab-btn dlc-btn" data-tab="dlc">DLC</button>
+            <button class="tab-btn" data-tab="info">Info</button>
+        </nav>
 
-            <div class="panel-content">
-                <div id="upgrades" class="tab-content active">
-                    <div id="upgrades-list" class="shop-list"></div>
-                </div>
+        <div class="panel-content">
+            <div id="upgrades" class="tab-content active">
+                <div id="upgrades-list" class="shop-list"></div>
+            </div>
 
-                <div id="pets" class="tab-content">
-                    <div id="pets-list" class="shop-list"></div>
-                </div>
+            <div id="pets" class="tab-content">
+                <div id="pets-list" class="shop-list"></div>
+            </div>
 
-                <div id="skins" class="tab-content">
-                    <div id="skins-list" class="skins-grid"></div>
+            <div id="skins" class="tab-content">
+                <div id="skins-list" class="skins-grid"></div>
+            </div>
+            
+            <div id="dlc" class="tab-content">
+                <div id="dlc-content" class="shop-list"></div>
+            </div>
+            
+            <div id="info" class="tab-content">
+                <div class="info-card">
+                    <h3>O Projekcie</h3>
+                    <p>Ta strona jest w 90% stworzona przez AI.</p>
+                    <p>Cały kod został wygenerowany i zoptymalizowany przez model Gemini dla użytkownika.</p>
+                    <p style="margin-top: 15px; font-size: 0.8rem; opacity: 0.7;">Wersja responsywna v2.4 (z DLC i menu)</p>
                 </div>
             </div>
-        </section>
-
-    </div>
+        </div>
+    </section>
 
     <div id="toast-container"></div>
 

@@ -1,36 +1,71 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<title>FOSZCZu KLIKER</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta charset="UTF-8">
-<link rel="stylesheet" href="style.css">
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BETA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>FOSZCZu KLIKER</h1>
-    </header>
-    
-    <div id="score-container">
-        Punkty: <span id="score">0</span>
+
+    <div id="game-background"></div>
+    <div id="particles-container"></div>
+
+    <div class="game-container">
+        
+        <header>
+            <div class="score-container">
+                <span class="score-label">PUNKTY</span>
+                <h1 id="score-display">0</h1>
+                <div class="mps-display"><span id="mps">0</span> / sek</div>
+            </div>
+            <div class="header-controls">
+                <button id="reset-btn" class="icon-btn" title="Reset Gry"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </header>
+
+        <main class="main-stage">
+            <div id="pets-container" class="pets-ring"></div>
+
+            <div class="clicker-wrapper">
+                <div id="clicker-circle" class="clicker">
+                    <img id="clicker-image" src="https://via.placeholder.com/300x300/ff0055/ffffff?text=Click+Me" alt="Clicker">
+                </div>
+                <label for="image-upload" class="upload-btn" title="Wgraj własne zdjęcie">
+                    <i class="fa-solid fa-camera"></i>
+                </label>
+                <input type="file" id="image-upload" accept="image/*" hidden>
+            </div>
+        </main>
+
+        <section class="game-panel">
+            <nav class="panel-tabs">
+                <button class="tab-btn active" data-tab="upgrades">Ulepszenia</button>
+                <button class="tab-btn" data-tab="pets">Zwierzątka</button>
+                <button class="tab-btn" data-tab="skins">Skiny</button>
+            </nav>
+
+            <div class="panel-content">
+                <div id="upgrades" class="tab-content active">
+                    <div id="upgrades-list" class="shop-list"></div>
+                </div>
+
+                <div id="pets" class="tab-content">
+                    <div id="pets-list" class="shop-list"></div>
+                </div>
+
+                <div id="skins" class="tab-content">
+                    <div id="skins-list" class="skins-grid"></div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
-    <img id="click-img" src="https://scontent.fktw6-1.fna.fbcdn.net/v/t39.30808-6/529862672_1276138710851142_3992710370146867348_n.jpg?_nc_cat=111&ccb=17&_nc_sid=6ee11a&_nc_ohc=_RVasW0q5kMQ7kNvwHhm6iK&_nc_oc=AdkLVcbEZ_v4cdHX8SsW0KzmvVS5jgFsHVtxUgW8JtXYIyg0wHibuak0GWCwYhqMZUc&_nc_zt=23&_nc_ht=scontent.fktw6-1.fna&_nc_gid=3j69aTre2l3snDmmSKzb8Q&oh=00_Afiv-sfBoxq7MMUNBUytaVUB6TulFZRTMUEFz4N0-P-Usw&oe=692BA61E" alt="Coin">
-
-    <div>
-        <button id="upgrade-btn">
-            Ulepsz (+1/klik) - Koszt: <span id="cost">10</span>
-        </button>
-    </div>
+    <div id="toast-container"></div>
 
     <script src="script.js"></script>
-
-
-    <footer>
-        <p>wszelkie gówno chuj do pipy</p>
-    </footer>
 </body>
-
 </html>

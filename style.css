@@ -1,66 +1,282 @@
-body{
- margin: 0;
- font-family: Arial, Helvetica, sans-serif;
- display: flex;
- flex-direction: column;
- align-items: center;
- justify-content: center;
- height: 100vh;
-}
-header{
- text-align: center;
-}
-footer{
- text-align: center;
- color: darkgray;
-}
-#score-container {
- font-size: 2.5rem; 
- margin-bottom: 30px;
- background: rgba(0, 0, 0, 0.3);
- padding: 10px 40px;
- border-radius: 10px;
- box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-}
-#click-img {
- width: 220px;
- height: 220px;
- cursor: pointer; 
- transition: transform 0.1s ease; 
- border-radius: 50%; 
- box-shadow: 0 8px 0 #1abc9c, 0 15px 0 rgba(0, 0, 0, 0.4); 
-touch-action: manipulation;
-}
-#click-img:active {
- transform: scale(0.95) translateY(4px); 
- box-shadow: 0 4px 0 #1abc9c, 0 10px 0 rgba(0, 0, 0, 0.4); 
-}
-.shop {
- margin-top: 50px;
- display: flex;
- gap: 15px;
-}
-#upgrade-btn {
- background-color: #e67e22; 
- border: none;
- padding: 15px 25px;
- color: white;
- font-size: 1.1rem;
- cursor: pointer;
- border-radius: 8px;
- transition: background 0.2s;
- text-align: center;
- line-height: 1.4;
-}
-#upgrade-btn:hover {
- background-color: #d35400; 
-}
-#upgrade-btn[disabled], #upgrade-btn.disabled {
- background-color: #7f8c8d; 
- cursor: not-allowed;
- opacity: 0.7;
+/* --- Zmienne globalne i Skiny --- */
+:root {
+    --bg-gradient: linear-gradient(135deg, #1a1a2e, #16213e);
+    --primary-color: #ff0055;
+    --secondary-color: #00d4ff;
+    --text-color: #ffffff;
+    --panel-bg: rgba(255, 255, 255, 0.1);
+    --font-main: 'Poppins', sans-serif;
+    --shadow-color: rgba(0, 0, 0, 0.5);
 }
 
+/* Skin: Cyberpunk (Domyślny) */
+body.skin-cyberpunk {
+    --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    --primary-color: #ff00cc;
+    --secondary-color: #3333ff;
+}
 
+/* Skin: Forest (Natura) */
+body.skin-forest {
+    --bg-gradient: linear-gradient(135deg, #134e5e, #71b280);
+    --primary-color: #ff9900;
+    --secondary-color: #a8ff78;
+}
 
+/* Skin: Candy (Słodki) */
+body.skin-candy {
+    --bg-gradient: linear-gradient(135deg, #ff9a9e, #fecfef);
+    --primary-color: #ff5e62;
+    --secondary-color: #ffffff;
+    --text-color: #333;
+    --panel-bg: rgba(255, 255, 255, 0.4);
+    --shadow-color: rgba(255, 100, 100, 0.2);
+}
 
+/* --- Reset i Baza --- */
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-drag: none; }
+body {
+    font-family: var(--font-main);
+    color: var(--text-color);
+    overflow: hidden;
+    height: 100vh;
+    background: var(--bg-gradient);
+    transition: background 1s ease;
+}
+
+/* --- Tło i Cząsteczki --- */
+#game-background {
+    position: absolute;
+    width: 100%; height: 100%;
+    z-index: -2;
+}
+#particles-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 100; /* Nad wszystkim, dla efektów kliknięcia */
+}
+
+/* --- Layout Gry --- */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* --- Header --- */
+header {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+}
+.score-label { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.8; }
+#score-display {
+    font-size: 3rem;
+    font-weight: 800;
+    text-shadow: 0 0 20px var(--primary-color);
+    transition: transform 0.1s;
+}
+.mps-display { font-size: 0.9rem; color: var(--secondary-color); }
+.header-controls { position: absolute; top: 0; right: 0; }
+.icon-btn {
+    background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; opacity: 0.5;
+}
+.icon-btn:hover { opacity: 1; }
+
+/* --- Główna Scena --- */
+.main-stage {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.clicker-wrapper {
+    position: relative;
+    width: 250px;
+    height: 250px;
+}
+
+.clicker {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid rgba(255,255,255,0.2);
+    box-shadow: 0 0 30px var(--primary-color);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.3s;
+    position: relative;
+    z-index: 2;
+    background: #000;
+}
+.clicker img { width: 100%; height: 100%; object-fit: cover; }
+.clicker:active { transform: scale(0.95); }
+.clicker.shake { animation: shake 0.3s ease-in-out; }
+
+/* Przycisk Uploadu */
+.upload-btn {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    background: var(--primary-color);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+}
+.upload-btn:hover { transform: scale(1.1); }
+
+/* --- Zwierzątka (Pets) --- */
+.pets-ring {
+    position: absolute;
+    width: 350px; height: 350px;
+    pointer-events: none;
+    z-index: 1;
+    /* Animacja obracania całego kontenera */
+    animation: rotateRing 20s linear infinite;
+}
+.pet {
+    position: absolute;
+    width: 50px; height: 50px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.5rem;
+    box-shadow: 0 0 10px var(--secondary-color);
+    /* Pozycjonowanie odbywa się w JS */
+}
+
+/* --- Panel Sklepu --- */
+.game-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(15px);
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    height: 40%;
+    box-shadow: 0 -5px 30px var(--shadow-color);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.panel-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.tab-btn {
+    flex: 1;
+    background: none; border: none;
+    padding: 15px;
+    color: var(--text-color);
+    font-family: var(--font-main);
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: 0.3s;
+}
+.tab-btn.active { opacity: 1; border-bottom: 3px solid var(--primary-color); }
+
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Elementy listy sklepu */
+.shop-item {
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    transition: transform 0.2s;
+}
+.shop-item:hover { transform: scale(1.02); background: rgba(0,0,0,0.3); }
+.shop-item.disabled { opacity: 0.5; cursor: not-allowed; }
+.item-icon {
+    font-size: 1.8rem; width: 50px; text-align: center; margin-right: 15px;
+}
+.item-info { flex: 1; }
+.item-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
+.item-info p { font-size: 0.75rem; opacity: 0.7; }
+.buy-btn {
+    background: var(--secondary-color);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Skin Grid */
+.skins-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+.skin-card {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.skin-card.active-skin { border-color: var(--secondary-color); }
+
+/* --- Animacje --- */
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes rotateRing {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+}
+
+/* Elementy Floating Text (+1) */
+.floating-text {
+    position: absolute;
+    color: var(--text-color);
+    font-weight: bold;
+    font-size: 1.5rem;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    text-shadow: 0 0 5px var(--primary-color);
+}
+
+/* Cząsteczki */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: fadeOut 0.8s forwards;
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: scale(0); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .clicker-wrapper { width: 200px; height: 200px; }
+    #score-display { font-size: 2.5rem; }
+    .game-panel { height: 50%; }
+}

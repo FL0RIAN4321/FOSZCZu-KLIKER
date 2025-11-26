@@ -7,8 +7,6 @@
     --panel-bg: rgba(255, 255, 255, 0.1);
     --font-main: 'Poppins', sans-serif;
     --shadow-color: rgba(0, 0, 0, 0.5);
-    --click-effect-color: var(--text-color);
-    --panel-collapsed-height: 50px; 
 }
 
 /* Skin: Cyberpunk (Domyślny) */
@@ -23,8 +21,6 @@ body.skin-forest {
     --bg-gradient: linear-gradient(135deg, #134e5e, #71b280);
     --primary-color: #ff9900;
     --secondary-color: #a8ff78;
-    --text-color: #222; 
-    --panel-bg: rgba(255, 255, 255, 0.5);
 }
 
 /* Skin: Candy (Słodki) */
@@ -48,7 +44,7 @@ body {
     transition: background 1s ease;
 }
 
-/* --- Tło i Cząsteczki (DLC) --- */
+/* --- Tło i Cząsteczki --- */
 #game-background {
     position: absolute;
     width: 100%; height: 100%;
@@ -58,18 +54,7 @@ body {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none;
-    z-index: 100;
-}
-.bg-particle-dot { 
-    position: absolute;
-    width: 2px; height: 2px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    animation: twinkle 10s infinite;
-}
-@keyframes twinkle {
-    0%, 100% { opacity: 0; transform: scale(0.5); }
-    50% { opacity: 1; transform: scale(1.5); }
+    z-index: 100; /* Nad wszystkim, dla efektów kliknięcia */
 }
 
 /* --- Layout Gry --- */
@@ -82,20 +67,12 @@ body {
     padding: 20px;
     position: relative;
     z-index: 1;
-    padding-bottom: 20px; 
 }
 
 /* --- Header --- */
 header {
     text-align: center;
-    padding-top: 20px;
-    position: relative;
-}
-.score-container {
-    display: inline-block;
-    padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 0 0 15px 15px;
+    margin-bottom: 20px;
     position: relative;
 }
 .score-label { font-size: 0.8rem; letter-spacing: 2px; opacity: 0.8; }
@@ -106,12 +83,7 @@ header {
     transition: transform 0.1s;
 }
 .mps-display { font-size: 0.9rem; color: var(--secondary-color); }
-.header-controls { 
-    position: absolute; 
-    top: 50%; 
-    right: 15px; 
-    transform: translateY(-50%); 
-}
+.header-controls { position: absolute; top: 0; right: 0; }
 .icon-btn {
     background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; opacity: 0.5;
 }
@@ -125,7 +97,13 @@ header {
     align-items: center;
     position: relative;
 }
-.clicker-wrapper { position: relative; width: 250px; height: 250px; }
+
+.clicker-wrapper {
+    position: relative;
+    width: 250px;
+    height: 250px;
+}
+
 .clicker {
     width: 100%; height: 100%;
     border-radius: 50%;
@@ -144,7 +122,8 @@ header {
 
 /* Przycisk Uploadu */
 .upload-btn {
-    position: absolute; bottom: 10px; right: 10px;
+    position: absolute;
+    bottom: 10px; right: 10px;
     background: var(--primary-color);
     width: 40px; height: 40px;
     border-radius: 50%;
@@ -152,157 +131,120 @@ header {
     cursor: pointer;
     z-index: 10;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
 }
+.upload-btn:hover { transform: scale(1.1); }
 
-/* --- Zwierzątka (Pets) - Naprawa Rotacji --- */
+/* --- Zwierzątka (Pets) --- */
 .pets-ring {
     position: absolute;
     width: 350px; height: 350px;
     pointer-events: none;
     z-index: 1;
-    /* Rotuje cały pierścień dookoła klikera */
-    animation: rotateRing 20s linear infinite; 
+    /* Animacja obracania całego kontenera */
+    animation: rotateRing 20s linear infinite;
 }
 .pet {
     position: absolute;
     width: 50px; height: 50px;
-    background: rgba(255,255,255,0.15); /* Lekko jaśniejsze tło */
+    background: rgba(255,255,255,0.1);
     border-radius: 50%;
     display: flex; justify-content: center; align-items: center;
     font-size: 1.5rem;
     box-shadow: 0 0 10px var(--secondary-color);
-    /* Counter-rotation - utrzymuje ikony w pionie */
-    animation: counterRotate 20s linear infinite; 
+    /* Pozycjonowanie odbywa się w JS */
 }
 
-/* --- Panel Sklepu (Mobilny - Dół ekranu) --- */
+/* --- Panel Sklepu --- */
 .game-panel {
     background: var(--panel-bg);
     backdrop-filter: blur(15px);
     border-radius: 20px 20px 0 0;
     display: flex;
     flex-direction: column;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    max-width: none; 
-    z-index: 1000;
-    height: 40vh;
+    height: 40%;
     box-shadow: 0 -5px 30px var(--shadow-color);
     border-top: 1px solid rgba(255,255,255,0.1);
-    transition: height 0.3s ease-in-out;
 }
-.panel-handle {
-    text-align: center;
-    padding: 10px;
-    background: rgba(0,0,0,0.1);
-    cursor: pointer;
-    border-radius: 20px 20px 0 0;
-    transition: background 0.2s;
-}
-.panel-handle:hover { background: rgba(0,0,0,0.3); }
-.panel-handle i { transition: transform 0.3s; }
 
-/* STAN ZWINIĘTY */
-.game-panel.collapsed { height: var(--panel-collapsed-height); }
-.game-panel.collapsed .panel-tabs, 
-.game-panel.collapsed .panel-content { display: none; }
-.game-panel.collapsed .panel-handle i { transform: rotate(180deg); }
-
-/* Zakładki */
 .panel-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .tab-btn {
-    flex: 1; background: none; border: none;
-    padding: 15px 5px; color: var(--text-color);
-    font-family: var(--font-main); font-weight: 600;
-    cursor: pointer; opacity: 0.6; transition: 0.3s;
-    font-size: 0.75rem;
+    flex: 1;
+    background: none; border: none;
+    padding: 15px;
+    color: var(--text-color);
+    font-family: var(--font-main);
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: 0.3s;
 }
 .tab-btn.active { opacity: 1; border-bottom: 3px solid var(--primary-color); }
-.dlc-btn { color: var(--secondary-color); font-weight: 800; }
 
 .panel-content {
-    flex: 1; overflow-y: auto; padding: 15px;
-    scrollbar-width: thin; scrollbar-color: var(--primary-color) rgba(0,0,0,0.2);
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
 }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* --- Poprawiony Wygląd Elementów Sklepu --- */
+/* Elementy listy sklepu */
 .shop-item {
-    display: flex; align-items: center;
-    background: rgba(0,0,0,0.3); /* Ciemniejsze tło, bardziej wyraźne */
-    margin-bottom: 12px;
-    padding: 15px; /* Większy padding */
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    padding: 10px;
     border-radius: 12px;
-    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-    cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Dodana głębia */
+    transition: transform 0.2s;
 }
-.shop-item:hover { 
-    transform: translateY(-2px) scale(1.01); /* Lekkie uniesienie */
-    background: rgba(0,0,0,0.4);
-    border-color: var(--primary-color);
-}
-.shop-item.disabled { 
-    opacity: 0.6; 
-    cursor: not-allowed; 
-    transform: none; 
-    border-color: rgba(255,255,255,0.05); 
-    box-shadow: none;
-}
-.shop-item.disabled:hover { transform: none; background: rgba(0,0,0,0.3); }
-
+.shop-item:hover { transform: scale(1.02); background: rgba(0,0,0,0.3); }
+.shop-item.disabled { opacity: 0.5; cursor: not-allowed; }
 .item-icon {
-    font-size: 2rem; /* Większa ikona */
-    width: 55px; 
-    text-align: center; 
-    margin-right: 15px;
-    filter: drop-shadow(0 0 5px var(--secondary-color)); /* Subtelna poświata */
+    font-size: 1.8rem; width: 50px; text-align: center; margin-right: 15px;
 }
 .item-info { flex: 1; }
-.item-info h4 { font-size: 1rem; margin-bottom: 3px; color: var(--secondary-color); }
-.item-info p { font-size: 0.8rem; opacity: 0.8; }
-
+.item-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
+.item-info p { font-size: 0.75rem; opacity: 0.7; }
 .buy-btn {
-    background: var(--primary-color); /* Zmiana koloru na główny dla kontrastu */
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    color: var(--text-color);
-    font-weight: bold;
-    box-shadow: 0 3px 0 rgba(0,0,0,0.5); /* Efekt 3D */
-    transition: background 0.2s;
-}
-.shop-item:hover .buy-btn {
     background: var(--secondary-color);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
     color: #000;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-/* Style DLC */
-.dlc-card {
-    border: 2px solid var(--secondary-color);
-    background: rgba(0, 212, 255, 0.1);
-    animation: pulseBorder 2s infinite alternate;
+/* Skin Grid */
+.skins-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
 }
+.skin-card {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.skin-card.active-skin { border-color: var(--secondary-color); }
 
 /* --- Animacje --- */
 @keyframes shake {
-    0% { transform: rotate(0deg); } 25% { transform: rotate(5deg); }
-    50% { transform: rotate(0deg); } 75% { transform: rotate(-5deg); }
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-5deg); }
     100% { transform: rotate(0deg); }
 }
 
 @keyframes rotateRing {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
-}
-/* NOWA ANIMACJA - Obraca ikonę w przeciwnym kierunku do pierścienia */
-@keyframes counterRotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(-360deg); }
 }
 
 @keyframes floatUp {
@@ -313,7 +255,7 @@ header {
 /* Elementy Floating Text (+1) */
 .floating-text {
     position: absolute;
-    color: var(--click-effect-color);
+    color: var(--text-color);
     font-weight: bold;
     font-size: 1.5rem;
     pointer-events: none;
@@ -321,52 +263,20 @@ header {
     text-shadow: 0 0 5px var(--primary-color);
 }
 
-@keyframes pulseBorder {
-    from { box-shadow: 0 0 10px var(--secondary-color); }
-    to { box-shadow: 0 0 20px var(--primary-color); }
+/* Cząsteczki */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: fadeOut 0.8s forwards;
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: scale(0); }
 }
 
-/* --- Responsive (Mobile Adjustments) --- */
-@media (max-width: 768px) {
-    .game-container {
-        max-width: 100%;
-        padding: 0 10px; 
-        height: 100%;
-        padding-bottom: 40vh; 
-    }
-    .game-panel.collapsed + .game-container, 
-    .game-panel.collapsed ~ .game-container {
-        padding-bottom: var(--panel-collapsed-height); 
-    }
-    
-    .score-container { width: 90%; }
-    #score-display { font-size: 2.5rem; }
+/* Responsive */
+@media (max-width: 600px) {
     .clicker-wrapper { width: 200px; height: 200px; }
-}
-
-/* --- Desktop Layout (Prawy Panel) --- */
-@media (min-width: 769px) {
-    .game-container {
-        padding: 20px;
-        max-width: 100%; 
-        padding-right: 350px; 
-    }
-    
-    .game-panel {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        bottom: 20px;
-        height: calc(100vh - 40px);
-        min-width: 300px;
-        max-width: 300px; 
-        border-radius: 15px;
-    }
-    
-    /* Na desktopie panel jest zawsze rozwinięty i uchwyt jest niewidoczny */
-    .panel-handle { display: none; }
-    .game-panel.collapsed { height: calc(100vh - 40px); }
-    .game-panel .panel-tabs { display: flex; }
-    .game-panel .panel-content { display: block; }
-    .panel-tabs .tab-btn { font-size: 0.8rem; }
+    #score-display { font-size: 2.5rem; }
+    .game-panel { height: 50%; }
 }
